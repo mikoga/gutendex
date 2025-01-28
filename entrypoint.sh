@@ -13,5 +13,5 @@ done
 
 python manage.py migrate
 python manage.py updatecatalog
-python manage.py collectstatic
+python manage.py collectstatic # into /var/www/gutendex/static-root
 python manage.py runserver ${BIND_HOST}:${BIND_PORT}
