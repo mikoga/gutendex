@@ -12,6 +12,7 @@ RUN apk add --no-cache \
     postgresql-dev \
     build-base \
     netcat-openbsd \
+    rsync \
     && pip install --upgrade pip
 
 
@@ -30,5 +31,6 @@ COPY books ./books
 COPY license .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
+RUN mkdir -p /app/catalog_files/tmp/cache/epub
 
 ENTRYPOINT [ "./entrypoint.sh" ]
