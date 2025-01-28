@@ -9,8 +9,6 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db-user.sh:/docker-entrypoint-initdb.d/init-user-db.sh
@@ -45,16 +43,39 @@ services:
       - PYTHONUNBUFFERED=${PYTHONUNBUFFERED}
       - BIND_HOST=${BIND_HOST}
       - BIND_PORT=${BIND_PORT}
-    ports:
-      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "${BIND_PORT}"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 10s
     depends_on:
       - postgres
     networks:
-      # - frontend-network
+      - frontend-network
       - backend-network
+    volumes:
+      - shared-static-volume:/var/www/gutendex/static-root:rw
+  
+  nginx:
+    image: nginx:1.27.3-alpine 
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - shared-static-volume:/data/static:ro
+    networks:
+      - frontend-network
+    depends_on:
+      python-app:
+        condition: service_healthy
+  
 
 volumes:
   postgres_data:
+    driver: local
+  shared-static-volume:
     driver: local
 
 networks:
