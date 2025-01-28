@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:14
-    container_name: postgres_14
+    container_name: ${DATABASE_HOST}
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DATABASE_USER}
@@ -14,8 +14,51 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db-user.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    networks:
+      - backend-network
+
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gutendex-app
+    environment:
+      - ADMIN_EMAILS=${ADMIN_EMAILS}
+      - ADMIN_NAMES=${ADMIN_NAMES}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_USER=${DATABASE_USER}
+      - DEBUG=${DEBUG}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_HOST_ADDRESS=${EMAIL_HOST_ADDRESS}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - MANAGER_EMAILS=${MANAGER_EMAILS}
+      - MANAGER_NAMES=${MANAGER_NAMES}
+      - MEDIA_ROOT=${MEDIA_ROOT}
+      - SECRET_KEY=${SECRET_KEY}
+      - STATIC_ROOT=${STATIC_ROOT}
+      - PYTHONDONTWRITEBYTECODE=${PYTHONDONTWRITEBYTECODE}
+      - PYTHONUNBUFFERED=${PYTHONUNBUFFERED}
+      - BIND_HOST=${BIND_HOST}
+      - BIND_PORT=${BIND_PORT}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    networks:
+      # - frontend-network
+      - backend-network
 
 volumes:
   postgres_data:
     driver: local
-     
+
+networks:
+  frontend-network:
+    driver: bridge
+  backend-network:
+    driver: bridge
