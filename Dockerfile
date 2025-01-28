@@ -15,7 +15,6 @@ RUN apk add --no-cache \
     rsync \
     && pip install --upgrade pip
 
-
 # Copy the requirements file (if you have one)
 COPY requirements.txt .
 
@@ -30,7 +29,7 @@ COPY catalog_files ./catalog_files
 COPY books ./books
 COPY license .
 COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
-RUN mkdir -p /app/catalog_files/tmp/cache/epub
+RUN chmod +x entrypoint.sh \
+    && mkdir -p /app/catalog_files/tmp/cache/epub
 
 ENTRYPOINT [ "./entrypoint.sh" ]
