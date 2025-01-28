@@ -29,7 +29,14 @@ COPY catalog_files ./catalog_files
 COPY books ./books
 COPY license .
 COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh \
-    && mkdir -p /app/catalog_files/tmp/cache/epub
+
+# Create a non-root user and group, set permissions and create neccessary directory
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
+    chown -R appuser:appgroup /app && \
+    chmod +x entrypoint.sh && \
+    mkdir -p /app/catalog_files/tmp/cache/epub
+
+# Switch to the non-root user
+USER appuser
 
 ENTRYPOINT [ "./entrypoint.sh" ]
